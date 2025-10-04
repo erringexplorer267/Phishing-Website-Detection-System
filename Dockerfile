@@ -4,19 +4,19 @@ FROM python:3.11-slim
 # 2. Set the working directory inside the container
 WORKDIR /app
 
-# 3. Copy the dependencies file first to leverage Docker caching
+# 3. Copy dependencies and install them first (for fast caching)
 COPY requirements.txt requirements.txt
-
-# 4. Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# 5. Copy the rest of the application code and the saved model
-# This includes app.py and model.pkl
+# 4. Copy the rest of the application files, including:
+#    - app.py (the main application)
+#    - index.html (the HTML file for your Flask app)
+#    - All .pkl model files
 COPY . .
 
-# 6. Expose the port where your application will listen
-EXPOSE 8080
+# 5. Inform Docker that the container will listen on port 8000
+EXPOSE 8000
 
-# 7. Define the command to run the application using Gunicorn (a production web server)
-# 'app:app' assumes your Flask/FastAPI app object is named 'app' in 'app.py'
-CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000"]
+# 6. Define the command to run the application using Gunicorn
+# 'app:app' assumes your Flask application instance is named 'app' in 'app.py'
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "app:app"]
