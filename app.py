@@ -1,9 +1,9 @@
-from flask import Flask, render_template, request, session, redirect, url_for, jsonify # Added jsonify just in case
-from flask_cors import CORS # ADDED: Required for API requests, good practice even for web apps
+from flask import Flask, render_template, request, session, redirect, url_for, jsonify
+from flask_cors import CORS
 import pickle
 import requests
 import io
-from urllib.parse import urlparse, unquote
+from urllib.parse import urlparse, unquote # Still needed, but not used for analysis
 
 app = Flask(__name__)
 # IMPORTANT: Set a secret key for session management
@@ -34,38 +34,7 @@ def load_model_from_url(url):
         print(f"Error loading model from URL {url}: {e}")
         return None
 
-# Function to analyze and extract suspicious URL features for user education (UNCHANGED)
-def analyze_url(url):
-    results = []
-    parsed = urlparse(url)
-    full_url = unquote(url) # Decode URL-encoded characters
-
-    # 1. URL Length Check
-    if len(full_url) > 75:
-        results.append(f"**Long URL**: The URL is unusually long ({len(full_url)} characters). Phishers use long URLs to hide the real domain.")
-
-    # 2. Presence of Suspicious Characters (@, //, etc.)
-    if '@' in full_url:
-        results.append("**Presence of '@' Symbol**: The '@' symbol is often used to embed credentials or confuse the browser about the true destination.")
-
-    # 3. Multiple Subdomains or Hiding Domain
-    if parsed.netloc.count('-') > 4 or parsed.netloc.count('.') > 3:
-        results.append("**Complex Subdomains**: The domain structure is overly complex or uses many hyphens, a technique to confuse the user.")
-
-    # 4. Presence of IP Address (less common but suspicious)
-    host_is_ip = parsed.netloc.replace('.', '').replace(':', '').isdigit()
-    if host_is_ip:
-        results.append("**IP Address Used**: Using an explicit IP address instead of a domain name is highly suspicious for legitimate sites.")
-
-    # 5. Keywords in Path (Phishing tactics like 'login', 'verify')
-    suspicious_keywords = ['login', 'verify', 'update', 'banking', 'secure']
-    path_lower = parsed.path.lower()
-    for keyword in suspicious_keywords:
-        if keyword in path_lower and keyword not in parsed.netloc.lower():
-            results.append(f"**Suspicious Path Keyword**: The URL path contains '{keyword}', a common tactic used by phishing sites to trick victims.")
-            break # only list one keyword finding
-
-    return results
+# --- REMOVED: analyze_url function ---
 
 # Load models once when the app starts
 try:
@@ -82,6 +51,7 @@ def index():
     predict_message = session.pop('predict_message', None)
     predict_class = session.pop('predict_class', None)
     url_checked = session.pop('url_checked', None)
+    # analysis_results is no longer needed but kept for template compatibility
     analysis_results = session.pop('analysis_results', None)
 
 
@@ -91,7 +61,6 @@ def index():
             predict_message = "System Error: Model files could not be loaded from storage. Check logs and model URLs."
             predict_class = 'error'
         # Render the template with the error message
-        # This assumes you have an 'index.html' inside a 'templates' folder.
         return render_template("index.html", predict_message=predict_message, predict_class=predict_class)
 
     if request.method == "POST":
@@ -108,26 +77,26 @@ def index():
             # Predict the class (e.g., 'good' or 'bad')
             predict_result = model.predict(vector.transform([url]))[0]
 
-            # --- Set Prediction Message and Class and Analysis ---
+            # --- Set Prediction Message and Class ---
             if predict_result == 'bad':
                 predict_message = "🔴 DANGER: PHISHING DETECTED! This site exhibits characteristics commonly associated with malicious links. Do not proceed."
                 predict_class = 'bad'
-                # IMPLEMENT MEDIUM FEATURE: Run Analysis when flagged as BAD
-                analysis_results = analyze_url(url)
+                # --- REMOVED: analysis_results = analyze_url(url) ---
+                analysis_results = [] # Set empty for template
             elif predict_result == 'good':
                 predict_message = "✅ SAFE: This URL appears legitimate and is likely safe to visit."
                 predict_class = 'good'
-                analysis_results = None # No need for analysis on good result
+                analysis_results = []
             else:
                 predict_message = "Error in prediction. Please try again. ❓"
                 predict_class = 'error'
-                analysis_results = None
+                analysis_results = []
 
             # 1. Save prediction results temporarily to session for the immediate GET request (PRG)
             session['predict_message'] = predict_message
             session['predict_class'] = predict_class
             session['url_checked'] = url_checked
-            session['analysis_results'] = analysis_results if analysis_results is not None else []
+            session['analysis_results'] = analysis_results
 
             # 2. Add to history (Easy Feature: History Log)
             if 'history' not in session:
@@ -154,6 +123,8 @@ def index():
             return redirect(url_for('index'))
 
     else: # GET request (Handles initial load and the redirect from POST)
+        # Ensure analysis_results is an empty list if None, for template safety
+        analysis_results = analysis_results if analysis_results is not None else []
         return render_template("index.html",
                                predict_message=predict_message,
                                predict_class=predict_class,
