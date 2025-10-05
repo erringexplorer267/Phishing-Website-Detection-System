@@ -6,123 +6,105 @@
     <title>Phishing Website Detection System</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* Import Poppins (Titles/Headings) and Montserrat (Body/Data) */
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;900&family=Montserrat:wght@400;600;700&display=swap');
+        /* Import a clean, modern font */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
         
-        /* Define a Light Mode Color Palette */
+        /* Define a modern, minimalistic color palette */
         :root {
             --primary-color: #3f51b5; /* A deep, professional blue */
             --secondary-color: #00bcd4; /* A supporting cyan for accents */
-            --background-light: #f0f2f5; /* Very light grey background */
-            --card-background: #ffffff; /* White cards */
-            --text-dark: #212529; /* Dark text for readability */
-            --text-medium: #6c757d; /* Medium grey text */
-            --border-subtle: #e0e0e0; /* Light grey border */
+            --background-light: #f4f6f8;
+            --card-background: #ffffff;
+            --text-dark: #212529;
+            --text-medium: #6c757d;
+            --border-subtle: #dee2e6;
             
-            /* Status colors (Light mode friendly) */
-            --status-good: #28a745; /* Green */
-            --status-bad: #dc3545; /* Red */
-            --status-error: #ffc107; /* Yellow */
+            /* Status colors (simplified) */
+            --status-good: #4CAF50;
+            --status-bad: #E53935;
+            --status-error: #FFC107;
         }
 
         body {
-            font-family: 'Montserrat', sans-serif;
+            font-family: 'Inter', sans-serif;
             background-color: var(--background-light);
-            color: var(--text-dark);
-            background-image: radial-gradient(circle at 50% 10%, rgba(63, 81, 181, 0.05) 0%, transparent 50%), 
-                              linear-gradient(to bottom right, #f8f9fa, #e9ecef); /* Subtle background pattern */
             background-attachment: fixed;
+            color: var(--text-dark);
             transition: background-color 0.3s;
         }
         
-        /* Card Style for Light Mode */
-        .cyber-card {
+        /* Remove glass and neon effects, use a soft card style */
+        .glass, .neon-box {
             background-color: var(--card-background);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1); /* Soft, subtle shadow */
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08); /* Soft, subtle shadow */
             border: 1px solid var(--border-subtle);
-            transition: all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
-        }
-
-        .cyber-card:hover {
-            box-shadow: 0 15px 45px rgba(0, 0, 0, 0.15);
+            transition: all 0.3s ease;
         }
 
         /* Header styling */
         .main-header {
-            font-family: 'Poppins', sans-serif;
             color: var(--primary-color);
-            letter-spacing: 1px;
-        }
-
-        /* Sub-Header/Report Header */
-        h3, h2 {
-            font-family: 'Poppins', sans-serif;
-            color: var(--text-dark);
+            font-weight: 700;
+            text-shadow: none; /* Removed neon shadow */
         }
         
         /* Input field enhancements */
         .cyber-input {
-            background-color: #ffffff; 
+            background-color: var(--background-light);
             border: 1px solid var(--border-subtle);
             color: var(--text-dark);
             transition: all 0.3s ease;
-            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.05); /* Subtle inner shadow */
-            font-family: 'Montserrat', sans-serif; 
         }
 
         .cyber-input:focus {
             border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(63, 81, 181, 0.2), inset 0 2px 5px rgba(0, 0, 0, 0.08); /* Soft focus ring */
-            background-color: #ffffff;
+            box-shadow: 0 0 0 3px rgba(63, 81, 181, 0.2); /* Soft focus ring */
+            background-color: var(--card-background);
         }
 
-        /* Button styling: Primary button */
+        /* Button styling */
         .btn-scan {
             background: var(--primary-color);
             color: white;
-            font-family: 'Poppins', sans-serif;
-            transition: all 0.3s ease;
-            box-shadow: 0 5px 15px rgba(63, 81, 181, 0.4);
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 4px 15px rgba(63, 81, 181, 0.4);
             border: none;
         }
 
         .btn-scan:hover {
             background: #5c6bc0; /* Slightly lighter shade on hover */
-            box-shadow: 0 8px 20px rgba(63, 81, 181, 0.5);
-            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(63, 81, 181, 0.5);
         }
 
+        .btn-scan::before, .scanning::after {
+            content: none !important; /* Remove all complex button animations */
+        }
+        
         /* Reset button style update */
         .reset-btn {
             background-color: #e9ecef;
-            border: 1px solid var(--border-subtle);
+            border-color: var(--border-subtle);
             color: var(--text-dark);
-            transition: all 0.2s;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-            font-family: 'Montserrat', sans-serif;
+            transition: background-color 0.2s;
         }
         
         .reset-btn:hover {
             background-color: #dee2e6;
-            color: var(--primary-color);
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
         }
 
-        /* Result boxes */
+        /* Result boxes (cleaner look) */
         .result-good {
             border-color: var(--status-good);
             background: #e6ffed; 
             color: var(--status-good);
-            box-shadow: 0 0 10px rgba(40, 167, 69, 0.2);
-            font-family: 'Poppins', sans-serif;
+            box-shadow: 0 0 10px rgba(76, 175, 80, 0.2);
         }
 
         .result-bad {
             border-color: var(--status-bad);
             background: #ffe6e6; 
             color: var(--status-bad);
-            box-shadow: 0 0 10px rgba(220, 53, 69, 0.2);
-            font-family: 'Poppins', sans-serif;
+            box-shadow: 0 0 10px rgba(229, 57, 53, 0.2);
         }
 
         .result-error {
@@ -130,81 +112,67 @@
             background: #fff8e1; 
             color: var(--status-error);
             box-shadow: 0 0 10px rgba(255, 193, 7, 0.2);
-            font-family: 'Poppins', sans-serif;
         }
-        
-        /* Analysis and History Containers */
-        .analysis-container, .history-log {
-             background-color: var(--card-background);
-             border: 1px solid var(--border-subtle);
-             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-        }
-        
+
         /* Analysis items */
         .analysis-item {
             background: #f8f9fa;
             border-left: 3px solid var(--secondary-color);
-            color: var(--text-dark);
-            font-family: 'Montserrat', sans-serif;
+            transition: background-color 0.3s ease, transform 0.2s;
         }
 
         .analysis-item:hover {
             background: #e9ecef;
+            transform: none; /* Remove horizontal shift */
         }
 
-        /* History log styling */
+        /* History log */
+        .history-log {
+            background-color: var(--card-background);
+            border: 1px solid var(--border-subtle);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+        }
+        
         .history-item {
             transition: background-color 0.2s;
-            border-left-width: 4px;
         }
 
-        .history-item span {
-            color: var(--text-dark); 
-        }
-        
-        /* Custom history item colors for light mode */
         .history-item.border-green-500 { border-left-color: var(--status-good); background: #f1fff1; }
-        .history-item.border-green-500:hover { background: #e0f6e0; }
+        .history-item.bg-green-900\/10:hover { background: #e0f6e0; }
         
         .history-item.border-red-500 { border-left-color: var(--status-bad); background: #fff1f1; }
-        .history-item.border-red-500:hover { background: #fbe0e0; }
+        .history-item.bg-red-900\/10:hover { background: #fbe0e0; }
 
-        .history-item.border-yellow-500 { border-left-color: var(--status-error); background: #fffae6; }
-        .history-item.border-yellow-500:hover { background: #f5eacf; }
+        .history-item.border-pink-500 { border-left-color: var(--status-error); background: #fffae6; }
+        .history-item.bg-pink-900\/10:hover { background: #f5eacf; }
         
-        /* Overrides for text color in specific items */
-        .history-item .text-green-700 { color: var(--status-good); }
-        .history-item .text-red-700 { color: var(--status-bad); }
-        .history-item .text-yellow-700 { color: var(--status-error); }
-        
-        .history-item .bg-green-500 { background-color: var(--status-good); color: white; }
-        .history-item .bg-red-500 { background-color: var(--status-bad); color: white; }
-        .history-item .bg-yellow-500 { background-color: var(--status-error); color: var(--text-dark); } /* Dark text on yellow for contrast */
-
+        .history-item span {
+            color: var(--text-dark); /* Ensure text is dark on light background */
+        }
     </style>
 </head>
 <body class="relative">
     <div class="min-h-screen flex flex-col items-center justify-center p-4 relative z-10">
         
-        <div class="w-full max-w-2xl cyber-card p-10 rounded-3xl shadow-lg transition duration-300">
+        <div class="w-full max-w-2xl glass p-10 rounded-3xl shadow-lg transition duration-300">
             <div class="text-center mb-8">
-                <div class="inline-block p-4 rounded-full mb-4 bg-gray-100 border-2 border-primary-color" style="color: var(--primary-color);">
+                <div class="inline-block p-4 rounded-full mb-4 bg-gray-200" style="color: var(--primary-color);">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                     </svg>
                 </div>
                 <h1 class="text-5xl font-bold mb-3 main-header tracking-tight">
-                    CYBER-SHIELD | URL SCAN
+                    Website or Weapon?
                 </h1>
-                <p class="text-gray-600 text-lg font-normal">
-                    Advanced Phishing & Threat Detection System
+                <p class="text-gray-600 text-lg">
+                    Advanced Phishing Detection System
                 </p>
             </div>
 
             <form method="POST" action="/" class="flex flex-col gap-6" onsubmit="return validateInput(event)">
                 <div class="relative">
                     <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-primary-color" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
                         </svg>
                     </div>
@@ -213,12 +181,12 @@
                         name="url" 
                         id="url_input"
                         placeholder="Enter URL (e.g., https://example.com)"
-                        class="cyber-input w-full pl-14 pr-5 py-5 rounded-xl text-lg focus:outline-none placeholder-gray-500"
+                        class="cyber-input w-full pl-14 pr-5 py-5 rounded-2xl text-lg focus:outline-none placeholder-gray-500"
                         required
                     >
                 </div>
                 
-                <div id="validation-message" class="text-sm text-red-600 hidden px-2 font-normal">
+                <div id="validation-message" class="text-sm text-red-600 hidden px-2">
                     ⚠ Input does not look like a domain or URL. Please enter a proper address.
                 </div>
                 
@@ -226,13 +194,13 @@
                     <button 
                         type="button" 
                         onclick="clearInputAndResult()"
-                        class="reset-btn w-1/3 font-semibold py-4 rounded-xl transition duration-300 shadow-sm uppercase text-xs tracking-widest"
+                        class="reset-btn w-1/3 font-semibold py-4 rounded-xl transition duration-300 shadow-sm"
                     >
-                        [ CLEAR ]
+                        RESET
                     </button>
                     <button 
                         type="submit" 
-                        class="btn-scan w-2/3 font-bold py-4 rounded-xl transition duration-300 uppercase tracking-wider shadow-lg relative z-10 text-base"
+                        class="btn-scan w-2/3 font-bold py-4 rounded-xl transition duration-300 uppercase tracking-wider shadow-lg relative z-10"
                     >
                         ⚡ INITIATE SCAN
                     </button>
@@ -245,22 +213,22 @@
             >
                 {{ predict_message | safe }}
                 {% if url_checked %}
-                <p class="text-xs mt-4 opacity-70 font-normal">Scanned URL: <span class="truncate block font-normal text-sm mt-1 text-gray-700">{{ url_checked }}</span></p>
+                <p class="text-xs mt-4 opacity-70 font-normal">Scanned URL: <span class="truncate block font-mono text-sm mt-1 text-gray-700">{{ url_checked }}</span></p>
                 {% endif %}
             </div>
             {% endif %}
 
             {% if analysis_results %}
-            <div class="mt-8 analysis-container p-6 rounded-2xl border border-primary-color/30">
-                <h3 class="text-2xl font-bold text-gray-800 mb-6 flex items-center border-b border-primary-color/50 pb-4">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 mr-3" style="color: var(--secondary-color);" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div class="mt-8 glass p-6 rounded-2xl shadow-inner border border-gray-200">
+                <h3 class="text-2xl font-bold text-gray-700 mb-6 flex items-center border-b border-gray-300 pb-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 mr-3 text-secondary-color" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
-                    <span style="color: var(--secondary-color);">SYSTEM ANALYSIS REPORT</span>
+                    <span class="text-secondary-color">SECURITY REPORT</span>
                 </h3>
                 <ul class="space-y-4">
                     {% for item in analysis_results %}
-                    <li class="analysis-item p-4 rounded-lg text-sm text-gray-700 font-normal border-l-4">
+                    <li class="analysis-item p-4 rounded-lg text-sm text-gray-700">
                         {{ item | safe }}
                     </li>
                     {% endfor %}
@@ -268,29 +236,27 @@
             </div>
             {% endif %}
 
-        </div> 
-        
-        {% if session.history %}
-        <div class="w-full max-w-2xl mt-8 cyber-card p-8 rounded-3xl shadow-lg history-log">
-            <h2 class="text-2xl font-bold text-gray-800 mb-6 border-b border-primary-color/50 pb-4 flex items-center">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 mr-3" style="color: var(--primary-color);" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        </div> {% if session.history %}
+        <div class="w-full max-w-2xl mt-8 glass p-8 rounded-3xl shadow-lg history-log">
+            <h2 class="text-2xl font-bold text-primary-color mb-6 border-b border-gray-300 pb-4 flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 mr-3 text-primary-color" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                SCAN HISTORY | LOGS
+                SCAN HISTORY
             </h2>
             <ul class="space-y-3">
                 {% for item in session.history %}
                 <li class="history-item p-4 rounded-xl flex items-center justify-between transition duration-300 border-l-4
-                            {% if item.result == 'good' %} border-green-500
-                            {% elif item.result == 'bad' %} border-red-500
-                            {% else %} border-yellow-500 {% endif %}">
-                    <span class="truncate font-medium text-sm w-3/4
+                            {% if item.result == 'good' %} border-green-500 bg-green-100/50 hover:bg-green-100
+                            {% elif item.result == 'bad' %} border-red-500 bg-red-100/50 hover:bg-red-100
+                            {% else %} border-yellow-500 bg-yellow-100/50 hover:bg-yellow-100 {% endif %}">
+                    <span class="truncate font-medium text-sm w-3/4 
                                     {% if item.result == 'good' %} text-green-700
                                     {% elif item.result == 'bad' %} text-red-700
                                     {% else %} text-yellow-700 {% endif %}">
                         {{ item.url }}
                     </span>
-                    <span class="font-bold text-right text-xs uppercase px-3 py-2 rounded-full
+                    <span class="font-bold text-right text-xs uppercase px-3 py-2 rounded-full 
                                     {% if item.result == 'good' %} bg-green-500 text-white 
                                     {% elif item.result == 'bad' %} bg-red-500 text-white 
                                     {% else %} bg-yellow-500 text-gray-900 {% endif %}">
@@ -304,7 +270,6 @@
     </div>
 
     <script>
-        // *** JAVASCRIPT LOGIC REMAINS COMPLETELY UNCHANGED ***
         function validateInput(event) {
             const inputField = document.getElementById('url_input');
             const messageBox = document.getElementById('validation-message');
@@ -341,7 +306,7 @@
                 resultBox.remove(); 
             }
             
-            const analysisBox = document.querySelector('.mt-8.analysis-container');
+            const analysisBox = document.querySelector('.mt-8.glass.p-6');
             if (analysisBox) {
                 analysisBox.remove();
             }
